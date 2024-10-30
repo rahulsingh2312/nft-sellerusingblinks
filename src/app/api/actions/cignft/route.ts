@@ -56,7 +56,7 @@ export const POST = async (req: NextRequest) => {
   try {
     const body: ActionPostRequest = await req.json();
     const account = new PublicKey(body.account);
-    const connection = new Connection("https://devnet.helius-rpc.com/?api-key=215399cd-1d50-4bdf-8637-021503ae6ef3");
+    const connection = new Connection("https://mainnet.helius-rpc.com/?api-key=215399cd-1d50-4bdf-8637-021503ae6ef3");
     
     // Create transaction
     const transaction = new Transaction();
