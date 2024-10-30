@@ -141,7 +141,6 @@ export const POST = async (req: NextRequest) => {
   
       // Return the response in the correct format for Blinks
       return NextResponse.json({
-        type: "transaction",
         transaction: base64Transaction,
         message: "You have purchased cig NFT (only 1 in existence).",
       });
