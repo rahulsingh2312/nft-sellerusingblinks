@@ -11,7 +11,7 @@ const INCREASE_PER_MINUTE = 10 // Increase by 10 tokens every minute
 
 export const GET = async (req: Request) => {
   const payload: ActionGetResponse = {
-    icon: "https://ipfs.filebase.io/ipfs/QmYvMG86rHL8Wj6cSCK8UWRjNBA1yEGELyTwmHyjY3mN4X",
+icon:"/cignft.jpeg",
     label: "Buy Aesthetic cig NFT",
     title: "cig NFT (only 1 in existence)",
     description: `Purchase a cig NFT for ${SEND_AMOUNT} tokens`,
@@ -38,16 +38,9 @@ export const POST = async (req: NextRequest) => {
   try {
     const body: ActionPostRequest = await req.json()
     const account = new PublicKey(body.account)
-    const x = req.nextUrl.searchParams.get('x')
 
-    if (!x) {
-      return new Response('Missing required parameters', {
-        status: 400,
-        headers: ACTIONS_CORS_HEADERS
-      })
-    }
 
-    const connection = new Connection(`https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_API_KEY}`)
+    const connection = new Connection(`https://mainnet.helius-rpc.com/?api-key=215399cd-1d50-4bdf-8637-021503ae6ef3`)
 
     const transaction = new Transaction()
     
@@ -83,7 +76,7 @@ export const POST = async (req: NextRequest) => {
       fields: {
         type: "transaction",
         transaction,
-        message: `You have sent ${SEND_AMOUNT} SEND tokens to the game.`,
+        message: `You have purchased cig nft only 1 in existence .`,
       },
     })
 
