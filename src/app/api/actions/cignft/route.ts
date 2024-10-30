@@ -10,12 +10,14 @@ import {
   Transaction,
   PublicKey,
   ComputeBudgetProgram,
-  Connection
+  Connection,
+  ParsedAccountData
 } from "@solana/web3.js";
 import {
   getAssociatedTokenAddress,
   createTransferInstruction,
-  TOKEN_PROGRAM_ID
+  TOKEN_PROGRAM_ID,
+  getOrCreateAssociatedTokenAccount
 } from "@solana/spl-token";
 
 // Constants
@@ -56,7 +58,6 @@ export const GET = async (req: NextRequest) => {
     headers: ACTIONS_CORS_HEADERS
   });
 };
-
 export const OPTIONS = GET;
 
 export const POST = async (req: NextRequest) => {
@@ -64,43 +65,67 @@ export const POST = async (req: NextRequest) => {
     const body: ActionPostRequest = await req.json();
     const account = new PublicKey(body.account);
     const connection = new Connection("https://devnet.helius-rpc.com/?api-key=215399cd-1d50-4bdf-8637-021503ae6ef3");
-
+    
+    // Function to get number of decimals for the token mint
+    async function getNumberDecimals(mintAddress: PublicKey): Promise<number> {
+      const info = await connection.getParsedAccountInfo(mintAddress);
+      const result = (info.value?.data as ParsedAccountData).parsed.info.decimals as number;
+      return result;
+    }
+    
+    // Create transaction
     const transaction = new Transaction();
-
+    
     // Increase compute budget
     transaction.add(
       ComputeBudgetProgram.setComputeUnitPrice({
         microLamports: 1000
       })
     );
-
-    // Get sender's associated token account for SEND token
-    const senderTokenAccount = await getAssociatedTokenAddress(SEND_TOKEN_MINT, account);
-    const receiverTokenAccount = await getAssociatedTokenAddress(SEND_TOKEN_MINT, ADDRESS);
-
+    
+    // Get sender's associated token account address
+    const senderTokenAccount = await getAssociatedTokenAddress(
+      SEND_TOKEN_MINT,
+      account
+    );
+    
+    // Get receiver's associated token account address
+    const receiverTokenAccount = await getAssociatedTokenAddress(
+      SEND_TOKEN_MINT,
+      ADDRESS
+    );
+    
+    // Get token decimals
+    const numberDecimals = await getNumberDecimals(SEND_TOKEN_MINT);
+    
+    // Calculate the amount with proper decimal places
     const SEND_AMOUNT = getCurrentSendAmount();
-
+    const adjustedAmount = SEND_AMOUNT * Math.pow(10, numberDecimals);
+    
     // Add token transfer instruction
     transaction.add(
       createTransferInstruction(
-        senderTokenAccount,
-        receiverTokenAccount,
-        account,
-        SEND_AMOUNT,  // Use the calculated SEND_AMOUNT
-        [],
+        senderTokenAccount,  // from (PublicKey)
+        receiverTokenAccount,  // to (PublicKey)
+        account,  // owner
+        adjustedAmount,  // amount adjusted for decimals
+        [],  // multiSigners
         TOKEN_PROGRAM_ID
       )
     );
-
+    
+    // Set fee payer and get recent blockhash
     transaction.feePayer = account;
-    const { blockhash } = await connection.getLatestBlockhash();
+    const { blockhash } = await connection.getLatestBlockhash('confirmed');
     transaction.recentBlockhash = blockhash;
-
+    
+    // Serialize the transaction
     const serializedTransaction = transaction.serialize({
       requireAllSignatures: false,
       verifySignatures: false,
     });
-
+    
+    // Create response payload
     const payload: ActionPostResponse = await createPostResponse({
       fields: {
         type: "transaction",
@@ -108,7 +133,7 @@ export const POST = async (req: NextRequest) => {
         message: `You have purchased cig NFT (only 1 in existence).`,
       },
     });
-
+    
     return new Response(JSON.stringify(payload), { headers: ACTIONS_CORS_HEADERS });
   } catch (err) {
     console.error(err);
