@@ -67,11 +67,11 @@ export const POST = async (req: NextRequest) => {
     const connection = new Connection("https://devnet.helius-rpc.com/?api-key=215399cd-1d50-4bdf-8637-021503ae6ef3");
     
     // Function to get number of decimals for the token mint
-    async function getNumberDecimals(mintAddress: PublicKey): Promise<number> {
-      const info = await connection.getParsedAccountInfo(mintAddress);
-      const result = (info.value?.data as ParsedAccountData).parsed.info.decimals as number;
-      return result;
-    }
+    // async function getNumberDecimals(mintAddress: PublicKey): Promise<number> {
+    //   const info = await connection.getParsedAccountInfo(mintAddress);
+    //   const result = (info.value?.data as ParsedAccountData).parsed.info.decimals as number;
+    //   return result;
+    // }
     
     // Create transaction
     const transaction = new Transaction();
@@ -96,7 +96,7 @@ export const POST = async (req: NextRequest) => {
     );
     
     // Get token decimals
-    const numberDecimals = await getNumberDecimals(SEND_TOKEN_MINT);
+    const numberDecimals = 6;
     
     // Calculate the amount with proper decimal places
     const SEND_AMOUNT = getCurrentSendAmount();
