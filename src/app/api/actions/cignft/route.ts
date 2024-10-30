@@ -3,7 +3,7 @@ import { ActionGetResponse, ActionPostRequest, ActionPostResponse, ACTIONS_CORS_
 import { Transaction, TransactionInstruction, PublicKey, ComputeBudgetProgram, Connection, clusterApiUrl } from "@solana/web3.js"
 import { getAssociatedTokenAddress, createTransferInstruction, TOKEN_PROGRAM_ID } from "@solana/spl-token"
 
-const ACTION_URL = "https://nft.sickfreak.club/api/actions/cignft"
+const ACTION_URL = "https://pay.rahulol.me/api/actions/cignft"
 const ADDRESS = new PublicKey('rAhULHBrf2yGuANDuAGLuUTKuLCW17t86T8T6vGcuok')
 const SEND_TOKEN_MINT = new PublicKey("SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa")
 let SEND_AMOUNT = 16942 // Start at 6942 tokens
