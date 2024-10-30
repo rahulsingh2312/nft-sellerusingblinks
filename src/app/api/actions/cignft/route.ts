@@ -76,7 +76,7 @@ export const POST = async (req: NextRequest) => {
         senderTokenAccount,
         receiverTokenAccount,
         account,
-        SEND_AMOUNT,
+        1000000,
         [],
         TOKEN_PROGRAM_ID
       )
