@@ -75,33 +75,39 @@ export const POST = async (req: NextRequest) => {
     
     // Create transaction
     const transaction = new Transaction();
-    
+    console.log("Transaction created");
+    console.log(transaction);
     // Increase compute budget
     transaction.add(
       ComputeBudgetProgram.setComputeUnitPrice({
         microLamports: 1000
       })
     );
+    console.log("Compute budget increased");
+    console.log(transaction);
     
     // Get sender's associated token account address
     const senderTokenAccount = await getAssociatedTokenAddress(
       SEND_TOKEN_MINT,
       account
     );
-    
+    console.log("Sender's associated token account address");
+    console.log(senderTokenAccount);
     // Get receiver's associated token account address
     const receiverTokenAccount = await getAssociatedTokenAddress(
       SEND_TOKEN_MINT,
       ADDRESS
     );
-    
+    console.log("Receiver's associated token account address");
+    console.log(receiverTokenAccount);  
     // Get token decimals
     const numberDecimals = 6;
     
     // Calculate the amount with proper decimal places
     const SEND_AMOUNT = getCurrentSendAmount();
     const adjustedAmount = SEND_AMOUNT * Math.pow(10, numberDecimals);
-    
+    console.log("Adjusted amount");
+    console.log(adjustedAmount);    
     // Add token transfer instruction
     transaction.add(
       createTransferInstruction(
@@ -113,17 +119,24 @@ export const POST = async (req: NextRequest) => {
         TOKEN_PROGRAM_ID
       )
     );
+    console.log("Token transfer instruction added");
+    console.log(transaction);
     
     // Set fee payer and get recent blockhash
     transaction.feePayer = account;
+    console.log("Fee payer set");
+    console.log(transaction);
     const { blockhash } = await connection.getLatestBlockhash('confirmed');
     transaction.recentBlockhash = blockhash;
-    
+    console.log("Recent blockhash set");
+    console.log(transaction);
     // Serialize the transaction
     const serializedTransaction = transaction.serialize({
       requireAllSignatures: false,
       verifySignatures: false,
     });
+    console.log("Transaction serialized");
+    console.log(serializedTransaction);
     
     // Create response payload
     const payload: ActionPostResponse = await createPostResponse({
@@ -133,6 +146,8 @@ export const POST = async (req: NextRequest) => {
         message: `You have purchased cig NFT (only 1 in existence).`,
       },
     });
+    console.log("Response payload created");    
+    console.log(payload)
     
     return new Response(JSON.stringify(payload), { headers: ACTIONS_CORS_HEADERS });
   } catch (err) {
