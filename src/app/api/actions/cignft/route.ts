@@ -11,43 +11,36 @@ import {
   PublicKey,
   ComputeBudgetProgram,
   Connection,
-  ParsedAccountData
+  SystemProgram,
 } from "@solana/web3.js";
-import {
-  getAssociatedTokenAddress,
-  createTransferInstruction,
-  TOKEN_PROGRAM_ID,
-  getOrCreateAssociatedTokenAccount
-} from "@solana/spl-token";
 
 // Constants
 const ACTION_URL = "https://pay.rahulol.me/api/actions/cignft";
 const ADDRESS = new PublicKey('rAhULHBrf2yGuANDuAGLuUTKuLCW17t86T8T6vGcuok');
-const SEND_TOKEN_MINT = new PublicKey("SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa");
-const BASE_SEND_AMOUNT = 1 ;  // 16.942k SEND in 6-decimal format
-const INCREASE_PER_MINUTE = 0 ;
+const BASE_SOL_AMOUNT = 0.16942;  // 16.942k SEND equivalent in SOL
+const INCREASE_PER_MINUTE = 0;
 const startTimestamp = new Date("2024-10-30T16:44:00.000Z").getTime();  // Start in UTC
 
-// Get the dynamically updated SEND_AMOUNT
-const getCurrentSendAmount = () => {
+// Get the dynamically updated SOL_AMOUNT
+const getCurrentSolAmount = () => {
   const minutesSinceStart = Math.floor((Date.now() - startTimestamp) / 60000);
-  return (BASE_SEND_AMOUNT + minutesSinceStart * INCREASE_PER_MINUTE) * 1000000;  // Adjust for 6 decimals
+  return BASE_SOL_AMOUNT + minutesSinceStart * INCREASE_PER_MINUTE;
 };
 
 export const GET = async (req: NextRequest) => {
-  const SEND_AMOUNT = getCurrentSendAmount();
+  const SOL_AMOUNT = getCurrentSolAmount();
 
   const payload: ActionGetResponse = {
     icon: "https://pay.rahulol.me/cignft.jpeg",
     label: "Buy Aesthetic cig NFT",
     title: "cig NFT (only 1 in existence)",
-    description: `Purchase a cig NFT for ${SEND_AMOUNT / 1000000} SEND tokens`,
+    description: `Purchase a cig NFT for ${SOL_AMOUNT} SOL`,
     disabled: false,
     links: {
       actions: [
         {
           href: `${ACTION_URL}`,
-          label: `buy with ${SEND_AMOUNT / 1000000} SEND Tokens`,
+          label: `buy with ${SOL_AMOUNT} SOL`,
           type: 'transaction'
         }
       ]
@@ -58,7 +51,6 @@ export const GET = async (req: NextRequest) => {
     headers: ACTIONS_CORS_HEADERS
   });
 };
-// export const OPTIONS = GET;
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -66,92 +58,56 @@ export const POST = async (req: NextRequest) => {
     const account = new PublicKey(body.account);
     const connection = new Connection("https://devnet.helius-rpc.com/?api-key=215399cd-1d50-4bdf-8637-021503ae6ef3");
     
-    // Function to get number of decimals for the token mint
-    // async function getNumberDecimals(mintAddress: PublicKey): Promise<number> {
-    //   const info = await connection.getParsedAccountInfo(mintAddress);
-    //   const result = (info.value?.data as ParsedAccountData).parsed.info.decimals as number;
-    //   return result;
-    // }
-    
     // Create transaction
     const transaction = new Transaction();
     console.log("Transaction created");
-    console.log(transaction);
+
     // Increase compute budget
     transaction.add(
       ComputeBudgetProgram.setComputeUnitPrice({
         microLamports: 1000
       })
     );
-    console.log("Compute budget increased");
-    console.log(transaction);
-    
-    // Get sender's associated token account address
-    const senderTokenAccount = await getAssociatedTokenAddress(
-      SEND_TOKEN_MINT,
-      account
-    );
-    console.log("Sender's associated token account address");
-    console.log(senderTokenAccount);
-    // Get receiver's associated token account address
-    const receiverTokenAccount = await getAssociatedTokenAddress(
-      SEND_TOKEN_MINT,
-      ADDRESS
-    );
-    console.log("Receiver's associated token account address");
-    console.log(receiverTokenAccount);  
-    // Get token decimals
-    const numberDecimals = 6;
-    
-    // Calculate the amount with proper decimal places
-    const SEND_AMOUNT = getCurrentSendAmount();
-    const adjustedAmount = SEND_AMOUNT * Math.pow(10, numberDecimals);
-    console.log("Adjusted amount");
-    console.log(adjustedAmount);    
-    // Add token transfer instruction
+
+    const SOL_AMOUNT = getCurrentSolAmount();
+    const lamports = Math.floor(SOL_AMOUNT * 1e9); // Convert SOL to lamports (1 SOL = 1e9 lamports)
+
+    // Add SOL transfer instruction
     transaction.add(
-      createTransferInstruction(
-        senderTokenAccount,  // from (PublicKey)
-        receiverTokenAccount,  // to (PublicKey)
-        account,  // owner
-        adjustedAmount,  // amount adjusted for decimals
-        [],  // multiSigners
-        TOKEN_PROGRAM_ID
-      )
+      SystemProgram.transfer({
+        fromPubkey: account,  // Payer's public key
+        toPubkey: ADDRESS,    // Recipient's public key
+        lamports: lamports,   // Amount in lamports
+      })
     );
-    console.log("Token transfer instruction added");
-    console.log(transaction);
-    
+
     // Set fee payer and get recent blockhash
     transaction.feePayer = account;
-    console.log("Fee payer set");
-    console.log(transaction);
     const { blockhash } = await connection.getLatestBlockhash('confirmed');
     transaction.recentBlockhash = blockhash;
-    console.log("Recent blockhash set");
-    console.log(transaction);
-     // After creating and serializing the transaction
-     const serializedTransaction = transaction.serialize({
-        requireAllSignatures: false,
-        verifySignatures: false,
-      });
-  
-      // Convert the serialized transaction to base64
-      const base64Transaction = Buffer.from(serializedTransaction).toString('base64');
-  
-      // Return the response in the correct format for Blinks
-      return NextResponse.json({
-        transaction: base64Transaction,
-        message: "You have purchased cig NFT (only 1 in existence).",
-      });
-  
-    } catch (error) {
-      console.error("Error processing transaction:", error);
-      return NextResponse.json(
-        { error: "Failed to process transaction", details: (error as Error).message },
-        { status: 500 }
-      );
-    }
-  }
 
-  export const OPTIONS = POST;
+    // Serialize the transaction
+    const serializedTransaction = transaction.serialize({
+      requireAllSignatures: false,
+      verifySignatures: false,
+    });
+
+    // Convert the serialized transaction to base64
+    const base64Transaction = Buffer.from(serializedTransaction).toString('base64');
+
+    // Return the response in the correct format for Blinks
+    return NextResponse.json({
+      transaction: base64Transaction,
+      message: "You have purchased cig NFT (only 1 in existence).",
+    });
+
+  } catch (error) {
+    console.error("Error processing transaction:", error);
+    return NextResponse.json(
+      { error: "Failed to process transaction", details: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
+
+export const OPTIONS = POST;
