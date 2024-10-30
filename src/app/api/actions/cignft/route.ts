@@ -18,7 +18,7 @@ import {
 const ACTION_URL = "https://pay.rahulol.me/api/actions/cignft";
 const ADDRESS = new PublicKey('rAhULHBrf2yGuANDuAGLuUTKuLCW17t86T8T6vGcuok');
 const BASE_SOL_AMOUNT = 0.16942;  // 16.942k SEND equivalent in SOL
-const INCREASE_PER_MINUTE = 0;
+const INCREASE_PER_MINUTE =   0.00001;  // 0.00001 SOL per minute
 const startTimestamp = new Date("2024-10-30T16:44:00.000Z").getTime();  // Start in UTC
 
 // Get the dynamically updated SOL_AMOUNT
