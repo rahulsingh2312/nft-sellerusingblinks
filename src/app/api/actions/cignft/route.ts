@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import {
   ActionGetResponse,
   ActionPostRequest,
@@ -58,7 +58,7 @@ export const GET = async (req: NextRequest) => {
     headers: ACTIONS_CORS_HEADERS
   });
 };
-export const OPTIONS = GET;
+// export const OPTIONS = GET;
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -130,28 +130,29 @@ export const POST = async (req: NextRequest) => {
     transaction.recentBlockhash = blockhash;
     console.log("Recent blockhash set");
     console.log(transaction);
-    // Serialize the transaction
-    const serializedTransaction = transaction.serialize({
-      requireAllSignatures: false,
-      verifySignatures: false,
-    });
-    console.log("Transaction serialized");
-    console.log(serializedTransaction);
-    
-    // Create response payload
-    const payload: ActionPostResponse = await createPostResponse({
-      fields: {
+     // After creating and serializing the transaction
+     const serializedTransaction = transaction.serialize({
+        requireAllSignatures: false,
+        verifySignatures: false,
+      });
+  
+      // Convert the serialized transaction to base64
+      const base64Transaction = Buffer.from(serializedTransaction).toString('base64');
+  
+      // Return the response in the correct format for Blinks
+      return NextResponse.json({
         type: "transaction",
-        transaction: Transaction.from(serializedTransaction),
-        message: `You have purchased cig NFT (only 1 in existence).`,
-      },
-    });
-    console.log("Response payload created");    
-    console.log(payload)
-    
-    return new Response(JSON.stringify(payload), { headers: ACTIONS_CORS_HEADERS });
-  } catch (err) {
-    console.error(err);
-    return new Response("An unknown error occurred", { status: 500 });
+        transaction: base64Transaction,
+        message: "You have purchased cig NFT (only 1 in existence).",
+      });
+  
+    } catch (error) {
+      console.error("Error processing transaction:", error);
+      return NextResponse.json(
+        { error: "Failed to process transaction", details: (error as Error).message },
+        { status: 500 }
+      );
+    }
   }
-};
+
+  export const OPTIONS = POST;
