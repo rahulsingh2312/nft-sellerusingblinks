@@ -34,8 +34,8 @@ export const GET = async (req: NextRequest) => {
     icon: "https://pay.rahulol.me/cignft.jpeg",
     label: "Buy Aesthetic cig NFT",
     title: "cig NFT (only 1 in existence)",
-    description: `Purchase a cig NFT for ${SOL_AMOUNT.toFixed(5)} SOL`,
-    disabled: false,
+    description: `sold for 0.17077 SOL`,
+    disabled: true,
     links: {
       actions: [
         {
