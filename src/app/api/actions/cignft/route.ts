@@ -40,7 +40,7 @@ export const GET = async (req: NextRequest) => {
       actions: [
         {
           href: `${ACTION_URL}`,
-          label: `buy with ${SOL_AMOUNT.toFixed(5)} SOL`,
+          label: `sold for 0.17077 SOL`,
           type: 'transaction'
         }
       ]
