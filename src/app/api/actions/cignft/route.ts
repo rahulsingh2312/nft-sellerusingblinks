@@ -11,7 +11,7 @@ const INCREASE_PER_MINUTE = 10 // Increase by 10 tokens every minute
 
 export const GET = async (req: Request) => {
   const payload: ActionGetResponse = {
-icon:"/cignft.jpeg",
+icon:"https://nft.sickfreak.club/cignft.jpeg",
     label: "Buy Aesthetic cig NFT",
     title: "cig NFT (only 1 in existence)",
     description: `Purchase a cig NFT for ${SEND_AMOUNT} tokens`,
