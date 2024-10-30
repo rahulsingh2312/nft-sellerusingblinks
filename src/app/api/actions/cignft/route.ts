@@ -23,13 +23,13 @@ const ACTION_URL = "https://pay.rahulol.me/api/actions/cignft";
 const ADDRESS = new PublicKey('rAhULHBrf2yGuANDuAGLuUTKuLCW17t86T8T6vGcuok');
 const SEND_TOKEN_MINT = new PublicKey("SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa");
 const BASE_SEND_AMOUNT = 16942 * 1000000;  // 16.942k SEND in 6-decimal format
-const INCREASE_PER_MINUTE = 1 * 1000000;
+const INCREASE_PER_MINUTE = 1 ;
 const startTimestamp = new Date("2024-10-30T16:44:00.000Z").getTime();  // Start in UTC
 
 // Get the dynamically updated SEND_AMOUNT
 const getCurrentSendAmount = () => {
   const minutesSinceStart = Math.floor((Date.now() - startTimestamp) / 60000);
-  return (BASE_SEND_AMOUNT + minutesSinceStart * INCREASE_PER_MINUTE) * 1_000_000;  // Adjust for 6 decimals
+  return (BASE_SEND_AMOUNT + minutesSinceStart * INCREASE_PER_MINUTE) * 1000000;  // Adjust for 6 decimals
 };
 
 export const GET = async (req: NextRequest) => {
@@ -39,13 +39,13 @@ export const GET = async (req: NextRequest) => {
     icon: "https://pay.rahulol.me/cignft.jpeg",
     label: "Buy Aesthetic cig NFT",
     title: "cig NFT (only 1 in existence)",
-    description: `Purchase a cig NFT for ${SEND_AMOUNT / 1_000_000} SEND tokens`,
+    description: `Purchase a cig NFT for ${SEND_AMOUNT / 1000000} SEND tokens`,
     disabled: false,
     links: {
       actions: [
         {
           href: `${ACTION_URL}`,
-          label: `buy with ${SEND_AMOUNT / 1_000_000} SEND Tokens`,
+          label: `buy with ${SEND_AMOUNT / 1000000} SEND Tokens`,
           type: 'transaction'
         }
       ]
