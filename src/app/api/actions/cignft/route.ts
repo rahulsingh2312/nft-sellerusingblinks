@@ -22,7 +22,7 @@ import {
 const ACTION_URL = "https://pay.rahulol.me/api/actions/cignft";
 const ADDRESS = new PublicKey('rAhULHBrf2yGuANDuAGLuUTKuLCW17t86T8T6vGcuok');
 const SEND_TOKEN_MINT = new PublicKey("SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa");
-const BASE_SEND_AMOUNT = 16942 * 1000000;  // 16.942k SEND in 6-decimal format
+const BASE_SEND_AMOUNT = 16942 ;  // 16.942k SEND in 6-decimal format
 const INCREASE_PER_MINUTE = 1 ;
 const startTimestamp = new Date("2024-10-30T16:44:00.000Z").getTime();  // Start in UTC
 
