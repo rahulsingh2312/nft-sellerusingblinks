@@ -4,7 +4,7 @@ import { Transaction, PublicKey, ComputeBudgetProgram, Connection, clusterApiUrl
 import { getAssociatedTokenAddress, createTransferInstruction, TOKEN_PROGRAM_ID } from "@solana/spl-token"
 
 // Set the base API URL and relevant constants
-const ACTION_URL = "https://nft.sickfreak.club/api/actions/cignft"
+const ACTION_URL = "https://pay.rahulol.me/api/actions/cignft"
 const ADDRESS = new PublicKey('rAhULHBrf2yGuANDuAGLuUTKuLCW17t86T8T6vGcuok')
 const SEND_TOKEN_MINT = new PublicKey("SENDdRQtYMWaQrBroBrJ2Q53fgVuq95CV9UPGEvpCxa")
 const BASE_SEND_AMOUNT = 16942
@@ -23,7 +23,7 @@ export const GET = async (req: Request) => {
   const SEND_AMOUNT = getCurrentSendAmount()
 
   const payload: ActionGetResponse = {
-    icon: "https://nft.sickfreak.club/cignft.jpeg",
+    icon: "https://pay.rahulol.me/cignft.jpeg",
     label: "Buy Aesthetic cig NFT",
     title: "cig NFT (only 1 in existence)",
     description: `Purchase a cig NFT for ${SEND_AMOUNT} tokens`,
